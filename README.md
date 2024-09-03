@@ -64,6 +64,7 @@ example for a valid body:
 <h2>Stopping the Payment Platform</h2>
 1. Enter the directory of the downloaded source code
 2. Run the script for shutting down the docker containers:
+
 ```
 sh stop-payment-platform.sh
 ```
