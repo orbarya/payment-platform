@@ -35,11 +35,11 @@ sh start-payment-platform.sh
 1. GET /v1/users/{user_id} - get all metadata of a user by his id
 
 2. GET /v1/users?searchTerm={search_term} - 
-- find all users whose full name matches the search term param query param
-- you can leave blank to get all users - this behavior is for POC level only and should be removed in future version.
+   - find all users whose full name matches the search term param query param
+   - you can leave blank to get all users - this behavior is for POC level only and should be removed in future version.
 
 3. GET /v1/users/{user_id}/payment-methods -
-- get all payment-methods for a user 
+   - get all payment-methods for a user 
 
 4. POST /v1/payments
 Body - a json containing the following keys:
