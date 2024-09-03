@@ -1,7 +1,7 @@
 <h1>Business Assumptions</h1>
 
 1. I assume that the POC will not include an API for creating/updating/deleting users or payment_methods. 
-The DB comes prepopulated with 2 users and 2 payment-methods for demonstrating the POC.
+The DB comes pre-populated with 2 users and 2 payment-methods for demonstrating the POC.
 2. I assume that the POC will only persist payments to a transaction log and not actually perform the money transfers. 
 3. I performed basic validations on inputs but additional validations must be made for production grade services.
 for example, I didn't check that a user can't send a payment to himself. 
@@ -23,7 +23,9 @@ for example, I didn't check that a user can't send a payment to himself.
 
 1. Enter the directory of the downloaded source code
 2. Run the script for building the artifacts and bringing up the docker containers:
-```run-payment-platform.sh```
+```
+sh start-payment-platform.sh
+```
 3. This scripts deletes previous build artifacts, rebuilds them and runs docker-compose up with all required components.
 
 <h2>Working with the Payment Platform</h2>
@@ -62,5 +64,7 @@ example for a valid body:
 <h2>Stopping the Payment Platform</h2>
 1. Enter the directory of the downloaded source code
 2. Run the script for shutting down the docker containers:
-   ```shutdown-payment-platform.sh```
+   ```
+   sh stop-payment-platform.sh
+   ```
 
