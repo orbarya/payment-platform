@@ -1,0 +1,88 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16   # Specify the version you want
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: payments_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # Persist data across container restarts
+    networks:
+      - payment-network
+    ports:
+      - "5432:5432"
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - payment-network
+    ports:
+      - "22181:2181"
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      - "9090:9090"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: EXTERNAL://0.0.0.0:9090, INTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: EXTERNAL://localhost:9090, INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    networks:
+      - payment-network
+  payment-service:
+    image: example/payment-service-docker:latest  # Image name from your Docker build
+    container_name: payment-service
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
+    ports:
+      - "8080:8080"  # Map host port 8080 to container port 8080
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - payment-network
+    environment:
+      KAFKA_CONNECTION_STRING: "kafka:29092"
+      PG_CONNECTION_STRING: "postgresql://postgres:5432/postgres"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "password"
+  risk-engine-service:
+    image: example/risk-engine-service-docker:latest  # Image name from your Docker build
+    container_name: risk-engine-service
+    build:
+      context: .
+      dockerfile: risk-engine-service/Dockerfile
+    ports:
+      - "8081:8080"  # Map host port 8081 to container port 8080
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - payment-network
+    environment:
+      KAFKA_CONNECTION_STRING: "kafka:29092"
+      PG_CONNECTION_STRING: "postgresql://postgres:5432/postgres"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "password"
+
+volumes:
+  pgdata:
+networks:
+  payment-network:
+    driver: bridge
